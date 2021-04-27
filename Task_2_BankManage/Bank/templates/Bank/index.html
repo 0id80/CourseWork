@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+    <title>Bank Manage</title>
+
+    <style>
+        .row {
+            padding-bottom: 3vh;
+        }
+        .content {
+            height: 60vh;
+        }
+        #input_command, #output_command {
+            min-height: 50vh;
+            max-height: 50vh;
+        }
+        .command {
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row header">
+            <nav class="navbar navbar-dark bg-dark">
+                <div class="container-fluid">
+                    <span class="navbar-brand mb-0 h1">Bank Manage
+                    <a href="admin" class="btn btn-success">Admin panel</a>
+                    <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    COMMANDS HINT
+                    </a>
+                    </span>
+                </div>
+            </nav>
+        </div>
+        <div class="collapse" id="collapseExample">
+            <div class="card card-body">
+                <p>
+                    <span class="command">DEPOSIT name sum</span>
+                    Зачислить сумму sum на счет клиента name.
+                </p>
+                <p>
+                    <span class="command">WITHDRAW name sum</span>
+                    Снять сумму sum со счета клиента name.
+                </p>
+                <p>
+                    <span class="command">BALANCE name</span>
+                    Узнать остаток средств на счету клиента name. Если пользователь не указал имя клиента – выводится баланс всех существующих клиентов.
+                </p>
+                <p>
+                    <span class="command">TRANSFER name1 name2 sum</span>
+                    Перевести сумму sum со счета клиента name1 на счет клиента name2.
+                </p>
+                <p>
+                    <span class="command">INCOME p</span>
+                    Начислить всем клиентам, у которых открыты счета, p% от суммы счета.
+                </p>
+            </div>
+        </div>
+        <div class="row content text-center">
+            <div class="col">
+                <form method="POST" action="calculate" id="calculate">
+                    {% csrf_token %}
+                    <label for="input_command" class="form-label">Commands</label>
+<textarea id="input_command" required class="form-control" name="input_command" aria-describedby="input_command_HelpBlock">{% for command in buffer_command.input_commands %}{{ command }}
+{% endfor %}
+</textarea>
+                    <div id="input_command_HelpBlock" class="form-text">
+                        ///
+                    </div>
+                    <br>
+                    <button type="submit" class="btn btn-success"> Calculate </button>
+                </form>
+            </div>
+            <div class="col">
+                <label for="output_command" class="form-label">Output</label>
+                <textarea type="text" id="output_command" disabled class="form-control" aria-describedby="output_command_HelpBlock"></textarea>
+                <div id="output_command_HelpBlock" class="form-text">
+                    ///
+                </div>
+                <br>
+                <form action="clear" method="POST" id="clear">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"> Clear </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var output_commands = {{ buffer_command.output_commands|safe }};
+        var commands = output_commands.join('\n\n');
+        var i = 1;
+        var n = commands.length;
+        var timer = 15;
+        function writer() {
+                $("#output_command").focus().val(commands.substr(0,i));
+                if (i <= n) {
+              var loop = setTimeout(writer, timer);
+                } else {
+                    clearTimeout(loop);
+                }
+            i++
+            };
+        writer();
+    </script>
+</body>
+</html>
