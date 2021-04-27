@@ -26,18 +26,6 @@ class Disk:
     def __repr__(self):
         return f"Obj: {self.size}"
 
-    def __gt__(self, other):
-        return self.size > other
-
-    def __lt__(self, other):
-        return self.size < other
-
-    def __ge__(self, other):
-        return self.size >= other
-
-    def __le__(self, other):
-        return self.size <= other
-
 
 class Tower:
     def __init__(self, number):
