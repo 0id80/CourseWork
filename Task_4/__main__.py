@@ -65,7 +65,7 @@ class HanoiTowers:
         self.start_position = self.prepare_data()
         self.iterations_count = 0
         # 9462265
-        self.calculate_tower()
+        # self.calculate_tower()
         print(self.iterations_count)
 
     def prepare_data(self) -> list:
@@ -74,19 +74,18 @@ class HanoiTowers:
             data_towers[tower].fill_tower(self.disks_sequence[tower])
         return data_towers
 
-    def calculate_tower(self):
+    def calculate_tower(self, progress=100):
+        need_iteration = 5
 
         def hanoi(n, a, b, c):
-            if n == 1:
+            if self.iterations_count == need_iteration:
+                print("SOBAAAAAAAAAAAAAAAAAAAAAKA")
+            if n != 0:
+                hanoi(n - 1, a, c, b)
                 self.iterations_count += 1
                 self.start_position[c].add_disk(self.start_position[a].take_first())
-                return
-            if n == 0:
-                return
-            hanoi(n - 1, a, c, b)
-            self.iterations_count += 1
-            self.start_position[c].add_disk(self.start_position[a].take_first())
-            hanoi(n - 1, b, a, c)
+                hanoi(n - 1, b, a, c)
+                print(self.iterations_count)
 
         start_time = datetime.now()
         print("Start:", self.start_position)
