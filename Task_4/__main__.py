@@ -24,7 +24,8 @@ class Disk:
         return f"T{self.tower} N{self.number} S{self.size} C{self.color}"
 
     def __repr__(self):
-        return f"Obj: {self.size}"
+        # return f"Disk: {self.size}"
+        return f"{self.size}"
 
 
 class Tower:
@@ -34,7 +35,8 @@ class Tower:
         self.disk_count = len(self.disks)
 
     def __repr__(self):
-        return f"Tower {self.number}: {self.disks}"
+        # return f"Tower {self.number}: {self.disks}"
+        return f"{self.disks}"
 
     def fill_tower(self, disk_count):
         for disk in range(disk_count):
@@ -63,44 +65,56 @@ class HanoiTowers:
         self.disks_sequence = [int(str(self.id)[i]) for i in range(len(str(self.id)))]
         self.towers_count = len(self.disks_sequence)
         self.start_position = self.prepare_data()
+        self.need_position = tuple()
         self.iterations_count = 0
-        # 9462265
+        # 117771268
         # self.calculate_tower()
-        print(self.iterations_count)
 
     def prepare_data(self) -> list:
-        data_towers = [Tower(number=tower+1) for tower in range(self.towers_count)]
+        data_towers = [Tower(number=tower) for tower in range(self.towers_count, 0, -1)]
         for tower in range(len(data_towers)):
             data_towers[tower].fill_tower(self.disks_sequence[tower])
-        return data_towers
+        return data_towers[::-1]
 
     def calculate_tower(self, progress=100):
-        need_iteration = 5
+        need_iteration = 117771268 * progress // 100
 
         def hanoi(n, a, b, c):
             if self.iterations_count == need_iteration:
-                print("SOBAAAAAAAAAAAAAAAAAAAAAKA")
+                print("HERE", self.start_position)
+                self.need_position = self.start_position
+                print(self.need_position, file=open("need_position.txt", "w+"))
             if n != 0:
                 hanoi(n - 1, a, c, b)
                 self.iterations_count += 1
                 self.start_position[c].add_disk(self.start_position[a].take_first())
                 hanoi(n - 1, b, a, c)
+
+        def step():
+            for index in range(0, self.towers_count-2):
+                towers = index, index+2, index+1
+                disk_counts = len(self.start_position[index].disks)
+                hanoi(disk_counts, *towers)
                 print(self.iterations_count)
 
-        start_time = datetime.now()
-        print("Start:", self.start_position)
-        for index in range(0, self.towers_count-2):
-            towers = index, index+2, index+1
-            disk_counts = len(self.start_position[index].disks)
-            hanoi(disk_counts, *towers)
+            hanoi(len(self.start_position[index+1].disks), index+1, index, index+2)
 
-        hanoi(len(self.start_position[index+1].disks), index+1, index, index+2)
-
-        print("End:", self.start_position)
-        end_time = datetime.now()
-        print("LostTime:", end_time - start_time)
+        # start_time = datetime.now()
+        # print("START:", self.start_position)
+        step()
+        # print("STEP 1:", self.start_position)
+        self.start_position = self.start_position[::-1]
+        # print("REVERSE:", self.start_position)
+        step()
+        # # print("END:", self.start_position)
+        # end_time = datetime.now()
+        # print(end_time - start_time)
+        print(self.start_position, file=open("end_position.txt", "w+"))
 
 
 if __name__ == '__main__':
     task = HanoiTowers(id=70151631)
-    start = task.start_position
+    start = task.start_position[::-1]
+    print("START", start)
+    task.calculate_tower(progress=100)
+    print("END", task.start_position)
