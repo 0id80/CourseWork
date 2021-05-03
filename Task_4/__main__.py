@@ -35,8 +35,8 @@ class Tower:
         self.disk_count = len(self.disks)
 
     def __repr__(self):
-        # return f"Tower {self.number}: {self.disks}"
-        return f"{self.disks}"
+        return f"T{self.number}: {self.disks}"
+        # return f"{self.disks}"
 
     def fill_tower(self, disk_count):
         for disk in range(disk_count):
@@ -77,7 +77,7 @@ class HanoiTowers:
         return data_towers[::-1]
 
     def calculate_tower(self, progress=100):
-        need_iteration = 117771268 * progress // 100
+        need_iteration = 67439623 * progress // 100
 
         def hanoi(n, a, b, c):
             if self.iterations_count == need_iteration:
@@ -95,26 +95,34 @@ class HanoiTowers:
                 towers = index, index+2, index+1
                 disk_counts = len(self.start_position[index].disks)
                 hanoi(disk_counts, *towers)
-                print(self.iterations_count)
+                # print(self.iterations_count)
 
             hanoi(len(self.start_position[index+1].disks), index+1, index, index+2)
+            # print(self.iterations_count)
 
-        # start_time = datetime.now()
-        # print("START:", self.start_position)
+            self.start_position = self.start_position[::-1]
+
+            # print("MIDDLE:", self.start_position)
+
+            for index in range(0, self.towers_count-2):
+                towers = index, index+1, index+2
+                disk_counts = len(self.start_position[index].disks)
+                hanoi(disk_counts, *towers)
+                # print(self.iterations_count)
+
+            hanoi(len(self.start_position[index + 1].disks), index + 1, index, index + 2)
+            # print(self.iterations_count)
+
         step()
-        # print("STEP 1:", self.start_position)
-        self.start_position = self.start_position[::-1]
-        # print("REVERSE:", self.start_position)
-        step()
-        # # print("END:", self.start_position)
-        # end_time = datetime.now()
-        # print(end_time - start_time)
+
         print(self.start_position, file=open("end_position.txt", "w+"))
+        return True
 
 
 if __name__ == '__main__':
     task = HanoiTowers(id=70151631)
     start = task.start_position[::-1]
     print("START", start)
-    task.calculate_tower(progress=100)
-    print("END", task.start_position)
+    if task.calculate_tower(progress=50):
+        print("!!", task.need_position)
+
