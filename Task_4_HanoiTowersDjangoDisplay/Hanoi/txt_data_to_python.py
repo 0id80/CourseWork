@@ -1,5 +1,5 @@
 from re import sub
-
+from json import loads, dumps
 
 def to_output(need_position, output_type="dict"):
     def to_dict(list_data):
@@ -33,3 +33,4 @@ if __name__ == '__main__':
               "T4: [21, 22, 36, 41, 55, 82, 83, 84, 85, 86, 87], T3: [], T2: [], T1: []]"
     result = to_output(example, output_type="dict")
     print(result)
+    print(dumps(result))
