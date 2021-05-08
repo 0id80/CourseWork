@@ -1,5 +1,9 @@
 from django.db.utils import cached_property
 from datetime import datetime
+from math import floor, ceil
+from json import loads, dumps
+from copy import deepcopy
+from HanoiTowersApp.models import Iteration
 
 task_hint = "8 шпинделей, пронумерованых от 8 до 1 слева направо" \
             "\nДиски, в количестве, равном соответствующей цифре из ID студента" \
@@ -17,9 +21,9 @@ class HanoiTowers:
     def __init__(self, id="70151631"):
         self.id = id
         self.scheme = self.prepare_data
+        self.prev_scheme = None
         self.__current_iteration = 0
-        print(self.iteration_count)
-        self.calculate_tower()
+        self.__current_percent = 1
 
     @property
     def prepare_data(self) -> list:
@@ -48,28 +52,95 @@ class HanoiTowers:
 
         return iteration_count
 
+    @cached_property
+    def iterations_numbers(self):
+        result = []
+        for percent in range(1, 101):
+            iteration = (67439623 * percent / 100)  # FIXME
+            if iteration.is_integer():
+                result.append(iteration)
+            else:
+                result.append((floor(iteration), ceil(iteration), iteration))
+        return result
+
+    @staticmethod
+    def combine_iteration(current, prev):
+        result = list()
+        for cur, pre in zip(current, prev):
+            if len(cur) < len(pre):
+                result.append(cur)
+            elif len(cur) == len(pre):
+                result.append(cur)
+            else:
+                result.append(pre)
+        return result
+
     def calculate_tower(self):
-        self.scheme = self.scheme[::-1]
 
-        def hanoi(n, a, b, c):
-
+        def hanoi(n, a, b, c, _reverse=False):
             if n != 0:
                 hanoi(n - 1, a, c, b)
-                # self.start_position[c].add_disk(self.start_position[a].take_first())
-                self.scheme[c].append(self.scheme[a].pop())
+                disk = self.scheme[a].pop()
+                self.scheme[c].append(disk)
                 self.__current_iteration += 1
+                if isinstance(self.iterations_numbers[0], tuple):
+                    if self.__current_iteration == self.iterations_numbers[0][0]:
+                        if _reverse:
+                            self.prev_scheme = deepcopy(self.scheme[::-1])
+                        else:
+                            self.prev_scheme = deepcopy(self.scheme)
+                    elif self.__current_iteration == self.iterations_numbers[0][1]:
+                        disk_in_motion = [disk, a, c]
+                        if _reverse:
+                            iteration_number = self.iterations_numbers.pop(0)[2]
+                            combine = self.combine_iteration(deepcopy(self.scheme[::-1]), self.prev_scheme)
+                            iteration = Iteration(percent=self.__current_percent,
+                                                  iteration_number=iteration_number,
+                                                  scheme=dumps(combine),
+                                                  disk_in_motion=disk_in_motion)
+                            iteration.save()
+                        else:
+                            iteration_number = self.iterations_numbers.pop(0)[2]
+                            combine = self.combine_iteration(deepcopy(self.scheme), self.prev_scheme)
+                            iteration = Iteration(percent=self.__current_percent,
+                                                  iteration_number=iteration_number,
+                                                  scheme=dumps(combine),
+                                                  disk_in_motion=disk_in_motion)
+                            iteration.save()
+                        self.__current_percent += 1
+                else:
+                    if self.__current_iteration == self.iterations_numbers[0]:
+                        if _reverse:
+                            iteration = Iteration(percent=self.__current_percent,
+                                                  iteration_number=self.iterations_numbers.pop(0),
+                                                  scheme=dumps(deepcopy(self.scheme[::-1])),
+                                                  disk_in_motion=None)
+                            iteration.save()
+                        else:
+                            iteration = Iteration(percent=self.__current_percent,
+                                                  iteration_number=self.iterations_numbers.pop(0),
+                                                  scheme=dumps(deepcopy(self.scheme)),
+                                                  disk_in_motion=None)
+                            iteration.save()
+                        self.__current_percent += 1
                 hanoi(n - 1, b, a, c)
 
         def step():
+            iteration = Iteration(percent=0,
+                                  iteration_number=0,
+                                  scheme=self.scheme,
+                                  disk_in_motion=None)
+            iteration.save()
+
+            self.scheme = self.scheme[::-1]
+
             for index in range(0, len(self.scheme)-2):
                 towers = index, index+2, index+1
-                # disk_counts = len(self.start_position[index].disks)
                 disk_counts = len(self.scheme[index])
-                hanoi(disk_counts, *towers)
+                hanoi(disk_counts, *towers, _reverse=True)
                 print(self.__current_iteration)
 
-            # hanoi(len(self.start_position[index+1].disks), index+1, index, index+2)
-            hanoi(len(self.scheme[index+1]), index+1, index, index+2)
+            hanoi(len(self.scheme[index+1]), index+1, index, index+2, _reverse=True)
 
             self.scheme = self.scheme[::-1]
 
@@ -79,15 +150,11 @@ class HanoiTowers:
                 hanoi(disk_counts, *towers)
 
             if not len(self.scheme) % 2:
-                # hanoi(len(self.start_position[index + 1].disks), index + 1, index, index + 2)
                 hanoi(len(self.scheme[index+1]), index+1, index, index+2)
 
         start = datetime.now()
         step()
-        print(self.scheme)
-
         print("Finished")
-        print(self.__current_iteration)
         end = datetime.now()
         print(end-start)
 

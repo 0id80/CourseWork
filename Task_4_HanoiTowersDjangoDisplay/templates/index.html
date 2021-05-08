@@ -29,72 +29,121 @@
         <div class="row text-center">
             <div class="col">
                 <h1>HANOI TOWERS</h1>
-                {{ data }}
+                {% if data.calculate == True %}
+                <div class="col">
+                    <form class="form-horizontal" method="POST">
+                    {% csrf_token %}
+                        <input name="step" style="display: none" class="form-control" value="calculate" required="required">
+                        <input class="btn btn-primary" type="submit" value="Calculate 100%">
+                    </form>
+                    <p>
+                        Кнопка предназначена для записи в базу данных 100% итераций для более быстрого отображения нужного % итерации
+                        <div class="alert alert-success" role="alert">
+                        После нажатия на кнопку "Calculate 100%" - начнется просчёт и запись итераций в базу данных, этот процесс занимает ~1 минуту,
+                        после чего страница перезагрузится и кнопка пропадёт
+                        </div>
+                        <div class="alert alert-warning" role="alert">
+                        Если эта кнопка отсутсвует - это значит база данных успешно записана и можно запрашивать любой % итераций
+                        </div>
+                    </p>
+                </div>
+                {% endif %}
+                <div class="col">
+<!--                        {{data.iteration}}-->
+                </div>
             </div>
         </div>
-        <div class="row text-center row-buttons">
-                <div class="col">
-                    <form class="form-horizontal" method="POST">
-                    {% csrf_token %}
-                        <input name="step" style="display: none" class="form-control" value="start" required="required">
-                        <input class="btn btn-primary" type="submit" value="START">
-                    </form>
-                </div>
-                <div class="col col-button">
-                    <form class="form-horizontal" method="POST">
-                    {% csrf_token %}
-                        <input name="step" type="number" min="1" max="100" class="form-control" value="70" required="required">
-                        <br>
-                        <input class="btn btn-primary" type="submit" value="П. 1">
-                    </form>
-                </div>
-                <div class="col">
-                    <form class="form-horizontal" method="POST">
-                    {% csrf_token %}
-                        <input name="step" type="number" min="1" max="100" class="form-control" value="15" required="required">
-                        <br>
-                        <input class="btn btn-primary" type="submit" value="П. 2">
-                    </form>
-                </div>
-                <div class="col">
-                    <form class="form-horizontal" method="POST">
-                    {% csrf_token %}
-                        <input name="step" type="number" min="1" max="100" class="form-control" value="16" required="required">
-                        <br>
-                        <input class="btn btn-primary" type="submit" value="П. 3">
-                    </form>
-                </div>
-                <div class="col">
-                    <form class="form-horizontal" method="POST">
-                    {% csrf_token %}
-                        <input name="step" type="number" min="1" max="100" class="form-control" value="31" required="required">
-                        <br>
-                        <input class="btn btn-primary" type="submit" value="П. 4">
-                    </form>
-                </div>
-                <div class="col">
-                    <form class="form-horizontal" method="POST">
-                    {% csrf_token %}
-                        <input name="step" style="display: none" class="form-control" value="end" required="required">
-                        <input class="btn btn-primary" type="submit" value="END">
-                    </form>
-                </div>
-        </div>
+        {% if data.calculate == False %}
+            <div class="row text-center row-buttons">
+                    <div class="col">
+                        <form class="form-horizontal" method="POST">
+                        {% csrf_token %}
+                            <input name="step" style="display: none" class="form-control" value="start" required="required">
+                            <input class="btn btn-primary" type="submit" value="START">
+                        </form>
+                    </div>
+                    <div class="col col-button">
+                        <form class="form-horizontal" method="POST">
+                        {% csrf_token %}
+                            <input name="step" type="number" min="1" max="100" class="form-control" value="70" required="required">
+                            <br>
+                            <input class="btn btn-primary" type="submit" value="П. 1">
+                        </form>
+                    </div>
+                    <div class="col">
+                        <form class="form-horizontal" method="POST">
+                        {% csrf_token %}
+                            <input name="step" type="number" min="1" max="100" class="form-control" value="15" required="required">
+                            <br>
+                            <input class="btn btn-primary" type="submit" value="П. 2">
+                        </form>
+                    </div>
+                    <div class="col">
+                        <form class="form-horizontal" method="POST">
+                        {% csrf_token %}
+                            <input name="step" type="number" min="1" max="100" class="form-control" value="16" required="required">
+                            <br>
+                            <input class="btn btn-primary" type="submit" value="П. 3">
+                        </form>
+                    </div>
+                    <div class="col">
+                        <form class="form-horizontal" method="POST">
+                        {% csrf_token %}
+                            <input name="step" type="number" min="1" max="100" class="form-control" value="31" required="required">
+                            <br>
+                            <input class="btn btn-primary" type="submit" value="П. 4">
+                        </form>
+                    </div>
+                    <div class="col">
+                        <form class="form-horizontal" method="POST">
+                        {% csrf_token %}
+                            <input name="step" style="display: none" class="form-control" value="end" required="required">
+                            <input class="btn btn-primary" type="submit" value="END">
+                        </form>
+                    </div>
+            </div>
 
-        <div class="row text-center">
-            {% for tower in towers %}
-            <div class="col" style="background-color: revert;">
-                Tower {{ tower.number }}:
-                {% for disk in tower.disks %}
-                    <div class="col" style="background-color: rgb{{ disk.color }}; width: {{ disk.size }}%;">{{ disk.size }}</div>
+            <div class="row text-center">
+                {% for tower_data in data.iteration|full_data %}
+                    <div class="col">
+                        <div class="row">
+                            {% if tower_data.0 == data.disk_in_motion.from %}
+                                FROM
+                            {% elif tower_data.0 == data.disk_in_motion.to %}
+                                TO
+                            {% else %}
+                                <br>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            {% if tower_data.0 == data.disk_in_motion.to %}
+                                <div class="col" style="background-color: rgb{{ data.disk_in_motion.disk|get_color }}; margin-left: 15px;  width: {{ data.disk_in_motion.disk }}%;">{{ data.disk_in_motion.disk }}</div>
+                            {% else %}
+                                <br>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            Tower {{ tower_data.1 }}:
+                        </div>
+
+                        <div class="row">
+                            {% if tower_data.2|length == 0 %}
+                                <br>
+                            {% else %}
+                                <div class="col" style="background-color: revert;">
+                                {% for disk in tower_data.2 %}
+                                    <div class="col" style="background-color: rgb{{ disk|get_color }}; margin-left: 15px;  width: {{disk}}%;">{{ disk }}</div>
+                                {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="col">______________</div>
+                        </div>
+                    </div>
                 {% endfor %}
-                <div class="col">______________</div>
             </div>
-            {% endfor %}
-        </div>
-        <div class="row">
-            <div class="col">Footer</div>
-        </div>
+        {% endif %}
     </div>
 
 </body>
