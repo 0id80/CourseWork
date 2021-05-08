@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from Hanoi import HanoiTowers
+from django.conf import settings
 
 from json import loads
 from random import randint, seed
@@ -27,9 +28,14 @@ def get_color(value):
 
 def index(request):
     hanoi = HanoiTowers(id="70151631")
-    data = dict()
-    data["iteration"] = hanoi.prepare_data
-    data["disk_in_motion"] = dict()
+    data = dict([("id", hanoi.id),
+                 ("name", settings.OWNER),
+                 ("iteration", hanoi.prepare_data),
+                 ("disk_in_motion", dict()),
+                 ("percent", 0),
+                 ("iteration_number", 0)
+                 ])
+
     iterations = Iteration.objects.all()
     if len(iterations) < 100:
         data["calculate"] = True
@@ -44,18 +50,26 @@ def index(request):
 
         if action == "calculate":
             hanoi.calculate_tower()
-            print(action)
 
         elif action == "start":
             need_iteration = iterations.get(percent=0)
             data["iteration"] = loads(need_iteration.scheme)
         elif action == "end":
-            data["iteration"] = loads(iterations.get(percent=100).scheme)
+            need_iteration = iterations.get(percent=100)
+            data["iteration"] = loads(need_iteration.scheme)
+            data["percent"] = need_iteration.percent
+            data["iteration_number"] = need_iteration.iteration_number
         else:
             need_iteration = iterations.get(percent=int(action))
             disk = loads(need_iteration.disk_in_motion)
             data["iteration"] = loads(need_iteration.scheme)
-            data["disk_in_motion"] = dict([("disk", disk[0]), ("from", disk[1]), ("to", disk[2])])
-            print(data["disk_in_motion"])
+            data["percent"] = need_iteration.percent
+            data["iteration_number"] = need_iteration.iteration_number
+            names_tower = {index: name for index, name in zip(range(0, len(data["iteration"])), range(len(data["iteration"]), 0, -1))}
+            data["disk_in_motion"] = dict([("disk", disk[0]),
+                                           ("from", disk[1]),
+                                           ("to", disk[2]),
+                                           ("from_name", names_tower.get(disk[1])),
+                                           ("to_name", names_tower.get(disk[2]))])
 
         return render(request, "index.html", context={"data": data})

@@ -29,6 +29,18 @@
         <div class="row text-center">
             <div class="col">
                 <h1>HANOI TOWERS</h1>
+                <h2>
+                    {{ data.name }} | {{ data.id }}
+                </h2>
+                <div class="alert alert-dark" role="alert">
+                <p>Percent: {{ data.percent }}% | № iteration: {{ data.iteration_number }}</p>
+                {% if data.disk_in_motion|length > 0 %}
+                    <p> Диск
+                        <span class="badge text-dark" style="border-radius: 5px;  background-color: rgb{{ data.disk_in_motion.disk|get_color }}">{{ data.disk_in_motion.disk  }}</span>
+                        был перемещён с башни №{{ data.disk_in_motion.from_name  }} на башню №{{ data.disk_in_motion.to_name  }}
+                    </p>
+                {% endif %}
+                </div>
                 {% if data.calculate == True %}
                 <div class="col">
                     <form class="form-horizontal" method="POST">

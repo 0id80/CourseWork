@@ -1,7 +1,7 @@
 from django.db.utils import cached_property
 from datetime import datetime
 from math import floor, ceil
-from json import loads, dumps
+from json import dumps
 from copy import deepcopy
 from HanoiTowersApp.models import Iteration
 
@@ -56,7 +56,7 @@ class HanoiTowers:
     def iterations_numbers(self):
         result = []
         for percent in range(1, 101):
-            iteration = (67439623 * percent / 100)  # FIXME
+            iteration = (67439623 * percent / 100)
             if iteration.is_integer():
                 result.append(iteration)
             else:
@@ -138,7 +138,6 @@ class HanoiTowers:
                 towers = index, index+2, index+1
                 disk_counts = len(self.scheme[index])
                 hanoi(disk_counts, *towers, _reverse=True)
-                print(self.__current_iteration)
 
             hanoi(len(self.scheme[index+1]), index+1, index, index+2, _reverse=True)
 
