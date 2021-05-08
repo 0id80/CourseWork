@@ -52,7 +52,6 @@ def index(request):
         elif action == "end":
             data["iteration"] = loads(iterations.get(percent=100).scheme)
         else:
-            # CALCULATE
             need_iteration = iterations.get(percent=int(action))
             disk = loads(need_iteration.disk_in_motion)
             data["iteration"] = loads(need_iteration.scheme)
