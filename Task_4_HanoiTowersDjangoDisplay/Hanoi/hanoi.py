@@ -24,6 +24,7 @@ class HanoiTowers:
         self.prev_scheme = None
         self.__current_iteration = 0
         self.__current_percent = 1
+        print(self.__iteration_count)
 
     @property
     def prepare_data(self) -> list:
@@ -38,17 +39,26 @@ class HanoiTowers:
         return data_towers
 
     @cached_property
-    def iteration_count(self) -> int:
+    def __iteration_count(self) -> int:
+        disk_map = list(map(int, list(self.id)))
         iteration_count = int()
-        disk_sum = int()
-        for disks_count in map(int, self.id[:1:-1] + self.id[1]):
-            disk_sum += disks_count
-            iteration_count += 2 ** disk_sum - 1
 
-        disk_sum = sum(map(int, self.id))
+        for a, b, c in zip(range(0, len(disk_map) - 2, 2), range(1, len(disk_map) - 1, 2), range(2, len(disk_map), 2)):
+            iteration_count += 2 ** disk_map[c] - 1
+            disk_map[c], disk_map[b] = 0, disk_map[c] + disk_map[b]
 
-        for _ in range(len(self.id) // 2):
-            iteration_count += 2 ** disk_sum - 1
+            iteration_count += 2 ** disk_map[b] - 1
+            disk_map[b], disk_map[a] = 0, disk_map[b] + disk_map[a]
+
+            iteration_count += 2 ** disk_map[a] - 1
+            disk_map[a], disk_map[c] = 0, disk_map[a] + disk_map[c]
+
+        if not len(disk_map) % 2:
+            iteration_count += 2 ** disk_map[-1] - 1
+            disk_map[-1], disk_map[-2] = 0, disk_map[-1] + disk_map[-2]
+
+            iteration_count += 2 ** disk_map[-2] - 1
+            disk_map[-2], disk_map[-1] = 0, disk_map[-2] + disk_map[-1]
 
         return iteration_count
 
@@ -56,7 +66,7 @@ class HanoiTowers:
     def iterations_numbers(self):
         result = []
         for percent in range(1, 101):
-            iteration = (67439623 * percent / 100)
+            iteration = (self.__iteration_count * percent / 100)
             if iteration.is_integer():
                 result.append(iteration)
             else:
@@ -77,52 +87,41 @@ class HanoiTowers:
 
     def calculate_tower(self):
 
-        def hanoi(n, a, b, c, _reverse=False):
+        def hanoi(n, a, b, c):
+            """
+                n = disks_count
+                A = FROM
+                B = BUFFER
+                C = TO
+            """
             if n != 0:
                 hanoi(n - 1, a, c, b)
                 disk = self.scheme[a].pop()
                 self.scheme[c].append(disk)
+
                 self.__current_iteration += 1
                 if isinstance(self.iterations_numbers[0], tuple):
                     if self.__current_iteration == self.iterations_numbers[0][0]:
-                        if _reverse:
-                            self.prev_scheme = deepcopy(self.scheme[::-1])
-                        else:
-                            self.prev_scheme = deepcopy(self.scheme)
+                        self.prev_scheme = deepcopy(self.scheme)
                     elif self.__current_iteration == self.iterations_numbers[0][1]:
                         disk_in_motion = [disk, a, c]
-                        if _reverse:
-                            iteration_number = self.iterations_numbers.pop(0)[2]
-                            combine = self.combine_iteration(deepcopy(self.scheme[::-1]), self.prev_scheme)
-                            iteration = Iteration(percent=self.__current_percent,
-                                                  iteration_number=iteration_number,
-                                                  scheme=dumps(combine),
-                                                  disk_in_motion=disk_in_motion)
-                            iteration.save()
-                        else:
-                            iteration_number = self.iterations_numbers.pop(0)[2]
-                            combine = self.combine_iteration(deepcopy(self.scheme), self.prev_scheme)
-                            iteration = Iteration(percent=self.__current_percent,
-                                                  iteration_number=iteration_number,
-                                                  scheme=dumps(combine),
-                                                  disk_in_motion=disk_in_motion)
-                            iteration.save()
+                        iteration_number = self.iterations_numbers.pop(0)[2]
+                        combine = self.combine_iteration(deepcopy(self.scheme), self.prev_scheme)
+                        iteration = Iteration(percent=self.__current_percent,
+                                              iteration_number=iteration_number,
+                                              scheme=dumps(combine),
+                                              disk_in_motion=disk_in_motion)
+                        iteration.save()
                         self.__current_percent += 1
                 else:
                     if self.__current_iteration == self.iterations_numbers[0]:
-                        if _reverse:
-                            iteration = Iteration(percent=self.__current_percent,
-                                                  iteration_number=self.iterations_numbers.pop(0),
-                                                  scheme=dumps(deepcopy(self.scheme[::-1])),
-                                                  disk_in_motion=None)
-                            iteration.save()
-                        else:
-                            iteration = Iteration(percent=self.__current_percent,
-                                                  iteration_number=self.iterations_numbers.pop(0),
-                                                  scheme=dumps(deepcopy(self.scheme)),
-                                                  disk_in_motion=None)
-                            iteration.save()
+                        iteration = Iteration(percent=self.__current_percent,
+                                              iteration_number=self.iterations_numbers.pop(0),
+                                              scheme=dumps(deepcopy(self.scheme)),
+                                              disk_in_motion=None)
+                        iteration.save()
                         self.__current_percent += 1
+
                 hanoi(n - 1, b, a, c)
 
         def step():
@@ -132,30 +131,25 @@ class HanoiTowers:
                                   disk_in_motion=None)
             iteration.save()
 
-            self.scheme = self.scheme[::-1]
-
-            for index in range(0, len(self.scheme)-2):
-                towers = index, index+2, index+1
-                disk_counts = len(self.scheme[index])
-                hanoi(disk_counts, *towers, _reverse=True)
-
-            hanoi(len(self.scheme[index+1]), index+1, index, index+2, _reverse=True)
-
-            self.scheme = self.scheme[::-1]
-
-            for index in range(0, len(self.scheme)-2):
-                towers = index, index+1, index+2
-                disk_counts = len(self.scheme[index])
-                hanoi(disk_counts, *towers)
+            for a, b, c in zip(range(0, len(self.scheme) - 2, 2), range(1, len(self.scheme) - 1, 2), range(2, len(self.scheme), 2)):
+                print(a, b, c)
+                hanoi(len(self.scheme[c]), c, a, b)
+                hanoi(len(self.scheme[b]), b, c, a)
+                hanoi(len(self.scheme[a]), a, b, c)
 
             if not len(self.scheme) % 2:
-                hanoi(len(self.scheme[index+1]), index+1, index, index+2)
+                a, b, c = a + 1, b + 1, c + 1
+                hanoi(len(self.scheme[c]), c, a, b)
+                hanoi(len(self.scheme[b]), b, a, c)
 
         start = datetime.now()
         step()
         print("Finished")
         end = datetime.now()
         print(end-start)
+        print(self.scheme)
+        print(self.__current_percent)
+        print(self.__current_iteration)
 
 
 if __name__ == '__main__':
