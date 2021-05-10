@@ -41,13 +41,13 @@ class TextParser:
         words = self.count_and_sort()
         with open("result_1.txt", "w+", encoding="UTF-8") as file:
             for word in words:
-                file.write(f"{word[0]} {word[1]} \n")
+                file.write(f"{word[1]} {word[0]} \n")
         return "Finished!"
 
     def output_to_console(self) -> str:
         words = self.count_and_sort()
         for word in words:
-            print(f"{word[0]} {word[1]}")
+            print(f"{word[1]} {word[0]}")
         return "Finished!"
 
 

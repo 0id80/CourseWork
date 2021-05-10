@@ -147,9 +147,6 @@ class HanoiTowers:
         print("Finished")
         end = datetime.now()
         print(end-start)
-        print(self.scheme)
-        print(self.__current_percent)
-        print(self.__current_iteration)
 
 
 if __name__ == '__main__':
