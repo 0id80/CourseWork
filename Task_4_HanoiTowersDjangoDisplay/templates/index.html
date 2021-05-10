@@ -20,6 +20,23 @@
             padding: 1vh;
         }
 
+        .from_to, .disk_in_motion, .tower_name {
+            padding: 1vh;
+        }
+
+        .tower {
+            border: 1px dashed grey;
+        }
+
+        a {
+            text-decoration: underline;
+            color: black;
+
+        }
+
+        a:hover {
+            color: white
+        }
     </style>
 
 </head>
@@ -117,18 +134,18 @@
 
             <div class="row text-center">
                 {% for tower_data in data.iteration|full_data %}
-                    <div class="col">
-                        <div class="row">
+                    <div class="col tower" style="background-color: darkgray;">
+                        <div class="row from_to">
                             {% if tower_data.0 == data.disk_in_motion.from %}
-                                FROM
+                                <p>FROM</p>
                             {% elif tower_data.0 == data.disk_in_motion.to %}
-                                TO
+                                <p>TO</p>
                             {% else %}
                                 <br>
                             {% endif %}
                         </div>
 
-                        <div class="row">
+                        <div class="row disk_in_motion">
                             {% if tower_data.0 == data.disk_in_motion.to %}
                                 <div class="col" style="background-color: rgb{{ data.disk_in_motion.disk|get_color }}; margin-left: 15px;  width: {{ data.disk_in_motion.disk }}%;">{{ data.disk_in_motion.disk }}</div>
                             {% else %}
@@ -136,17 +153,17 @@
                             {% endif %}
                         </div>
 
-                        <div class="row">
-                            Tower {{ tower_data.1 }}:
+                        <div class="row tower_name">
+                            <p>Tower {{ tower_data.1 }}:</p>
                         </div>
 
                         <div class="row">
                             {% if tower_data.2|length == 0 %}
                                 <br>
                             {% else %}
-                                <div class="col" style="background-color: revert;">
+                                <div class="col">
                                 {% for disk in tower_data.2 %}
-                                    <div class="col" style="background-color: rgb{{ disk|get_color }}; margin-left: 15px;  width: {{disk}}%;">{{ disk }}</div>
+                                    <div class="col" style="background-color: rgb{{ disk|get_color }}; margin-left: 15px;  width:{{disk}}%;">{{ disk }}</div>
                                 {% endfor %}
                                 </div>
                             {% endif %}
@@ -156,6 +173,10 @@
                 {% endfor %}
             </div>
         {% endif %}
+
+        <div class="row footer text-center">
+            <p> created by <a target="_blank" href="http://vk.com/evgeniymalyh">@evgeniymalyh</a> | <a target="_blank" href="https://github.com/0id80">github</a></p>
+        </div>
     </div>
 
 </body>
