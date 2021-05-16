@@ -13,7 +13,7 @@ from importlib import import_module
 
 
 class ExtendedModeWindow(QWidget):
-    _normal_size = 500, 650
+    _normal_size = 550, 650
     _default_id = 70151631
     _memory_cells = {}
 
