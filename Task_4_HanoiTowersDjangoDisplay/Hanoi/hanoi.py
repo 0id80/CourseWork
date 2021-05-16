@@ -97,7 +97,7 @@ class HanoiTowers:
             if n != 0:
                 hanoi(n - 1, a, c, b)
                 disk = self.scheme[a].pop()
-                self.scheme[c].append(disk)
+                self.scheme[c].append(disk)  # Само перемещение диска с башни на башню
 
                 self.__current_iteration += 1
                 if isinstance(self.iterations_numbers[0], tuple):
